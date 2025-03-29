@@ -96,5 +96,3 @@ class Admin extends User
     string menu()
     void start()
     void startAdmin()
-
-

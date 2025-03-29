@@ -1,63 +1,77 @@
-public class SavingsAccount extends CheckingAccount {
+import java.util.Scanner;
+import java.io.Serializable;
+
+public class SavingsAccount extends CheckingAccount implements Serializable {
     private double interestRate;
 
-    // Constructor with balance and interest rate
     public SavingsAccount(double balance, double interestRate) {
-        super(balance); // Call the CheckingAccount constructor
+        super(balance);
         this.interestRate = interestRate;
     }
 
-    // Method to calculate interest and update the balance
-    public void calcInterest() {
-        double interest = getBalance() * interestRate / 100;
-        double newBalance = getBalance() + interest;
-        setBalance(newBalance);
-        System.out.println("Interest calculated. New Balance: " + getBalanceString());
-    }
-
-    // Getter for interest rate
     public double getInterestRate() {
         return interestRate;
     }
 
-    // Setter for interest rate
     public void setInterestRate(double interestRate) {
-        this.interestRate = interestRate;
+        if (interestRate >= 0) {
+            this.interestRate = interestRate;
+        } else {
+            System.out.println("Interest rate cannot be negative.");
+        }
     }
 
-    // Menu method specific to SavingsAccount
+    public void calcInterest() {
+        double interest = getBalance() * interestRate;
+        setBalance(getBalance() + interest);
+    }
+
     @Override
     public String menu() {
-        return "0) Quit\n1) Check Balance\n2) Calculate Interest";
+        return "Savings Account Menu\n" +
+               "0) Exit\n" +
+               "1) Check Balance\n" +
+               "2) Make a Deposit\n" +
+               "3) Make a Withdrawal\n" +
+               "4) Calculate Interest\n" +
+               "5) Set Interest Rate\n" +
+               "Action: ";
     }
 
-    // Start method to handle user input
     @Override
     public void start() {
         boolean exit = false;
         while (!exit) {
-            System.out.println(menu());
-            java.util.Scanner scanner = new java.util.Scanner(System.in);
-            int choice = scanner.nextInt();
-            switch (choice) {
-                case 0:
-                    exit = true;
-                    break;
-                case 1:
-                    checkBalance();
-                    break;
-                case 2:
-                    calcInterest();
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-                    break;
+            System.out.print(menu());
+            Scanner scanner = new Scanner(System.in);
+            int choice;
+            
+            choice = scanner.nextInt();
+
+            if (choice == 0) {
+                exit = true;
+            } else if (choice == 1) {
+                checkBalance();
+            } else if (choice == 2) {
+                makeDeposit();
+            } else if (choice == 3) {
+                makeWithdraw();
+            } else if (choice == 4) {
+                calcInterest();
+                checkBalance();
+            } else if (choice == 5) {
+                System.out.print("Enter new interest rate (as decimal, e.g., 0.05 for 5%): ");
+                double rate = getDouble();
+                setInterestRate(rate);
+                System.out.println("Interest rate set to: " + (rate * 100) + "%");
+            } else {
+                System.out.println("Invalid choice. Please try again.");
             }
         }
     }
 
     public static void main(String[] args) {
-        SavingsAccount savingsAccount = new SavingsAccount(1000.00, 5.0); // Test with initial balance of 1000.00 and interest rate of 5%
+        SavingsAccount savingsAccount = new SavingsAccount(1000.00, 0.05);
         savingsAccount.start();
     }
 }

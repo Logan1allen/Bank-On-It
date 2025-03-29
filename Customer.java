@@ -1,10 +1,16 @@
-public class Customer extends User {
+import java.util.Scanner;
+import java.io.Serializable;
+import java.text.NumberFormat;
+
+public class Customer extends User implements Serializable {
     private CheckingAccount checking;
     private SavingsAccount savings;
+    private transient NumberFormat currencyFormatter;
 
     public Customer() {
         checking = new CheckingAccount();
-        savings = new SavingsAccount(0, 0.02); // Assuming a default interest rate
+        savings = new SavingsAccount(0, 0.05);
+        currencyFormatter = NumberFormat.getCurrencyInstance();
     }
 
     public Customer(String userName, String PIN) {
@@ -13,18 +19,29 @@ public class Customer extends User {
         setPIN(PIN);
     }
 
+    public Customer(String userName, String PIN, double checkingBalance, double savingsBalance) {
+        setUserName(userName);
+        setPIN(PIN);
+        checking = new CheckingAccount(checkingBalance);
+        savings = new SavingsAccount(savingsBalance, 0.05);
+        currencyFormatter = NumberFormat.getCurrencyInstance();
+    }
+
+    @Override
     public String menu() {
         return "Customer Menu\n" +
                "0) Exit\n" +
                "1) Manage Checking Account\n" +
                "2) Manage Savings Account\n" +
-               "3) change PIN";
+               "3) Change PIN\n" +
+               "Action: ";
     }
 
+    @Override
     public void start() {
         boolean running = true;
         while (running) {
-            System.out.println(menu());
+            System.out.print(menu());
             int choice = getChoice();
     
             if (choice == 0) {
@@ -41,20 +58,58 @@ public class Customer extends User {
         }
     }
     
-
     private int getChoice() {
-        // Replace with actual code for getting user input
-        return 1; // Temporary stub for compilation
+        Scanner scanner = new Scanner(System.in);
+        int choice = -1;
+        choice = Integer.parseInt(scanner.nextLine());
+        return choice;
     }
 
     private void changePin() {
-        System.out.println("Changing PIN...");
-        // Implement PIN change logic here
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter current PIN: ");
+        String currentPin = scanner.nextLine();
+        
+        if (currentPin.equals(getPIN())) {
+            System.out.print("Enter new PIN: ");
+            String newPin = scanner.nextLine();
+            System.out.print("Confirm new PIN: ");
+            String confirmPin = scanner.nextLine();
+            
+            if (newPin.equals(confirmPin)) {
+                setPIN(newPin);
+                System.out.println("PIN changed successfully.");
+            } else {
+                System.out.println("PINs do not match. PIN not changed.");
+            }
+        } else {
+            System.out.println("Incorrect current PIN. PIN not changed.");
+        }
     }
 
-    public String getReport() {
-        return "Customer Report: " + getUserName() + " checking balance: " + checking.getBalance();
+    public CheckingAccount getChecking() {
+        return checking;
     }
+
+    public SavingsAccount getSavings() {
+        return savings;
+    }
+    
+
+    private NumberFormat getCurrencyFormatter() {
+        if (currencyFormatter == null) {
+            currencyFormatter = NumberFormat.getCurrencyInstance();
+        }
+        return currencyFormatter;
+    }
+
+    @Override
+    public String getReport() {
+        return "User: " + getUserName() + 
+               ", Checking: " + checking.getBalanceString() + 
+               ", Savings: " + savings.getBalanceString();
+    }
+    
     public static void main(String[] args) {
         Customer customer = new Customer("Alice", "1111");
         if (customer.login()) {
